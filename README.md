@@ -56,9 +56,12 @@ export PATH="$HOME/.local/bin:$PATH"
 
 Each shim script:
 1. Captures your current Windows directory (e.g., `C:\Users\you\project`)
-2. Converts it to WSL format (e.g., `/mnt/c/users/you/project`)
-3. Executes the command in WSL with the correct working directory
-4. Passes through all arguments and return codes
+2. Converts it to WSL format using `wslpath` (if available) or regex fallback
+3. Sets a minimal PATH in WSL (including `~/.local/bin`) for fast execution
+4. Executes the command in WSL with the correct working directory
+5. Preserves all arguments, exit codes, and environment context
+
+**Performance note:** Shims avoid using login shells to prevent slow `.bashrc` loading. They set PATH explicitly for speed.
 
 ## Example
 
@@ -92,6 +95,32 @@ wsl
 
 **Q: "command not found: q" after install**
 A: Add `~/.local/bin` to your PATH (see Installation section)
+
+**Q: Issues with paths containing spaces or special characters?**
+A: The shims use proper quoting and escaping. If you encounter issues, please report them with details.
+
+**Q: Shims are slow or hang**
+A: If Q CLI is installed in a non-standard location, edit the shims to include your custom path in the PATH export statement.
+
+## Testing
+
+Run the test suite to verify your installation:
+
+```bash
+./test.sh
+```
+
+The test suite checks:
+- Path conversion for various drive letters and formats
+- Handling of spaces in paths
+- WSL availability and Q CLI detection
+- Exit code preservation
+
+## Known Limitations
+
+- **Network paths** (`\\server\share`) are not supported
+- **Non-standard WSL mount points**: Assumes default `/mnt/` prefix
+- **Multiple WSL distros**: Uses your default WSL distribution (configurable via `wsl -d`)
 
 ## Contributing
 

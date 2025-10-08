@@ -1,5 +1,15 @@
 #!/bin/bash
 # Git Bash shim for Amazon Q CLI - runs via WSL
 WIN_DIR="$(pwd -W 2>/dev/null || pwd)"
-WSL_PATH=$(echo "$WIN_DIR" | sed -e 's|^\([A-Za-z]\):|/mnt/\L\1|' -e 's|\\|/|g')
-wsl.exe bash -c "cd '$WSL_PATH' && q $(printf '%q ' "$@")"
+
+# Use wslpath if available, otherwise fall back to sed conversion
+if command -v wslpath >/dev/null 2>&1; then
+    WSL_PATH=$(wslpath -a "$WIN_DIR")
+else
+    WSL_PATH=$(echo "$WIN_DIR" | sed -e 's|^\([A-Za-z]\):|/mnt/\L\1|' -e 's|\\|/|g')
+fi
+
+# Run in WSL - use common PATH locations to avoid slow login shell
+# Includes ~/.local/bin where Q is typically installed
+wsl.exe bash -c "export PATH=\"\$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:\$PATH\"; cd '$WSL_PATH' && q $(printf '%q ' "$@")"
+exit $?

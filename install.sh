@@ -24,8 +24,8 @@ if ! command -v wsl.exe >/dev/null 2>&1; then
 fi
 
 # Check if q works in WSL
-log_info "Checking if 'q doctor' works in WSL..."
-if ! wsl.exe bash -c "command -v q >/dev/null 2>&1"; then
+log_info "Checking if 'q' command exists in WSL..."
+if ! wsl.exe bash -c "export PATH=\"\$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:\$PATH\"; command -v q >/dev/null 2>&1"; then
     log_error "'q' command not found in WSL."
     log_error "Please install Amazon Q CLI in WSL first:"
     log_error "  wsl"
@@ -33,8 +33,11 @@ if ! wsl.exe bash -c "command -v q >/dev/null 2>&1"; then
     exit 1
 fi
 
-if ! wsl.exe bash -c "q doctor" >/dev/null 2>&1; then
-    log_warn "'q doctor' failed in WSL. Continuing anyway..."
+log_info "Testing 'q doctor' in WSL (with timeout)..."
+if timeout 3 wsl.exe bash -c "export PATH=\"\$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:\$PATH\"; q doctor" >/dev/null 2>&1; then
+    log_info "'q doctor' succeeded"
+else
+    log_warn "'q doctor' timed out or failed. Continuing anyway..."
 fi
 
 # Install to ~/.local/bin
@@ -52,9 +55,9 @@ log_info "Installation complete!"
 
 # Check if ~/.local/bin is in PATH
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    log_warn "~/.local/bin is not in your PATH."
+    log_warn "$HOME/.local/bin is not in your PATH."
     echo ""
-    echo "Add this to your ~/.bashrc:"
+    echo "Add this to your $HOME/.bashrc:"
     echo ""
     echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
     echo ""

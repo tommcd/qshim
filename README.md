@@ -49,6 +49,7 @@ cd wshims
 ```
 
 The installer will:
+
 - ✅ Check that WSL is available
 - ✅ Verify `q` command works in WSL (if you use Q CLI)
 - ✅ Install `w` and Q CLI shims to `~/.local/bin/`
@@ -65,13 +66,16 @@ export PATH="$HOME/.local/bin:$PATH"
 The project includes two types of wrappers:
 
 ### `w` - General WSL Wrapper
+
 A reusable command that runs anything in WSL from your current Windows directory:
+
 - Converts Windows path to WSL format (`wslpath` or regex fallback)
 - Sets a minimal PATH for fast execution (no slow `.bashrc` loading)
 - Preserves TTY for interactive commands
 - Works with any WSL command or script
 
 ### Q CLI Shims (`q`, `qchat`, `qterm`)
+
 Ultra-simple 3-line scripts that just call: `w q "$@"`, `w qchat "$@"`, `w qterm "$@"`
 
 **Performance note:** Uses explicit PATH setting instead of login shells to avoid slow startup times.
@@ -79,6 +83,7 @@ Ultra-simple 3-line scripts that just call: `w q "$@"`, `w qchat "$@"`, `w qterm
 ## Examples
 
 ### Using Q CLI
+
 ```bash
 # Navigate to any Windows directory
 cd /c/Users/you/my-project
@@ -92,6 +97,7 @@ q                          # Interactive mode
 ```
 
 ### Using `w` for Other Commands
+
 ```bash
 # Run any WSL command from Windows Git Bash
 w ls -la                   # List files in WSL
@@ -117,6 +123,7 @@ exec w <command> "$@"
 ### Example: Python shim
 
 Create `~/.local/bin/py` (if you want WSL Python instead of Windows Python):
+
 ```bash
 #!/bin/bash
 exec w python3 "$@"
@@ -138,8 +145,13 @@ That's it! The `w` command handles all the complexity.
 ## Uninstall
 
 ```bash
-rm ~/.local/bin/w ~/.local/bin/q ~/.local/bin/qchat ~/.local/bin/qterm
-# Plus any custom shims you created
+./uninstall.sh
+```
+
+If you added additional custom shims, remove them manually:
+
+```bash
+rm ~/.local/bin/<your-shim>
 ```
 
 ## Troubleshooting
@@ -149,6 +161,7 @@ A: Install WSL: `wsl --install` in PowerShell (as admin)
 
 **Q: "'q' command not found in WSL"**
 A: Install Amazon Q CLI in WSL first:
+
 ```bash
 wsl
 # Then follow the Linux installation instructions for Q
@@ -168,14 +181,37 @@ A: If Q CLI is installed in a non-standard location, edit the shims to include y
 Run the test suite to verify your installation:
 
 ```bash
-./test.sh
+./scripts/test.sh
 ```
 
 The test suite checks:
+
 - Path conversion for various drive letters and formats
 - Handling of spaces in paths
 - WSL availability and Q CLI detection
 - Exit code preservation
+
+### Quality checks
+
+Install the required tooling first (examples below):
+
+- macOS/Homebrew: `brew install shellcheck shfmt` then `pip install mdformat`
+- Linux (apt): `sudo apt-get install shellcheck shfmt` then `pip install mdformat`
+- Windows (Git Bash with scoop): `scoop install shellcheck shfmt` then `pip install mdformat`
+
+Run the aggregated quality checks:
+
+```bash
+./scripts/check-quality.sh
+```
+
+The script fails if any required tool is missing. To auto-format files after fixes:
+
+```bash
+./scripts/fix-quality.sh
+```
+
+Shell lint issues reported by `shellcheck` need to be fixed manually.
 
 ## Known Limitations
 

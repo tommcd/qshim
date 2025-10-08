@@ -1,10 +1,10 @@
 # qshim
 
-> Git Bash to WSL bridge for Amazon Q CLI on Windows
+> Windows shell to WSL bridge for Amazon Q CLI
 
 ## What is this?
 
-The [Amazon Q CLI](https://aws.amazon.com/q/) provides Linux binaries that don't run natively in Git Bash on Windows. **qshim** creates lightweight wrapper scripts that automatically run the WSL version when you type `q`, `qchat`, or `qterm` from Git Bash—no matter what Windows directory you're in.
+The [Amazon Q CLI](https://aws.amazon.com/q/) provides Linux binaries that don't run natively on Windows. **qshim** creates lightweight wrapper scripts that automatically run the WSL version when you type `q`, `qchat`, or `qterm` from your Windows shell—no matter what directory you're in.
 
 ## Quick Start
 
@@ -14,13 +14,15 @@ The [Amazon Q CLI](https://aws.amazon.com/q/) provides Linux binaries that don't
 curl -fsSL https://raw.githubusercontent.com/tommcd/qshim/main/install.sh | bash
 ```
 
-That's it! Now you can use `q`, `qchat`, and `qterm` from Git Bash.
+That's it! Now you can use `q`, `qchat`, and `qterm` from your Windows shell.
 
 ## Requirements
 
-- **Windows** with Git Bash (MINGW/MSYS)
+- **Windows** with a shell environment (Git Bash, PowerShell, or CMD)
 - **WSL** (Windows Subsystem for Linux) - [Install WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
 - **Amazon Q CLI** installed in WSL (not in Windows)
+
+> **Note:** Currently supports Git Bash (MINGW/MSYS). PowerShell and CMD support coming soon!
 
 ## Installation Options
 
@@ -61,13 +63,13 @@ Each shim script:
 ## Example
 
 ```bash
-# In Git Bash, navigate to a Windows directory
+# Navigate to any Windows directory
 cd /c/Users/you/my-project
 
 # Run q - it works seamlessly!
 q chat "explain this code"
 
-# The command actually runs in WSL at /mnt/c/users/you/my-project
+# The command automatically runs in WSL at /mnt/c/users/you/my-project
 ```
 
 ## Uninstall

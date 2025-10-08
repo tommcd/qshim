@@ -14,3 +14,6 @@ Desktop.ini
 # Backup files
 *.bak
 *.backup
+
+# Local AI/IDE artifacts
+.claude/

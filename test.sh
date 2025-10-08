@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test suite for qshim path conversion and functionality
+# Test suite for wshims path conversion and functionality
 
 set -euo pipefail
 
@@ -22,6 +22,7 @@ log_fail() {
 }
 
 log_info() { echo -e "${YELLOW}→${NC} $1"; }
+log_warn() { echo -e "${YELLOW}!${NC} $1"; }
 
 # Test path conversion function (extracted from shims)
 convert_path() {
@@ -33,7 +34,7 @@ convert_path() {
     fi
 }
 
-echo "qshim Test Suite"
+echo "wshims Test Suite"
 echo "================="
 echo ""
 
@@ -124,7 +125,7 @@ if command -v wsl.exe >/dev/null 2>&1; then
             log_info "Q doctor timed out or failed (may be expected)"
         fi
     else
-        log_fail "Q CLI not found in WSL"
+        log_warn "Q CLI not found in WSL (install it to exercise q, qchat, qterm)"
     fi
 fi
 

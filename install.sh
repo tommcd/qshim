@@ -1,5 +1,5 @@
 #!/bin/bash
-# qshim installer - Git Bash to WSL bridge for Amazon Q CLI
+# wshims installer - Git Bash to WSL bridge for running Linux tools via WSL
 set -euo pipefail
 
 GREEN='\033[0;32m'
@@ -11,9 +11,11 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1" >&2; }
 
+WSL_ENV_SETUP='export PATH="\$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:\$PATH";'
+
 # Check if on Windows (Git Bash/MINGW)
 if [[ ! "$(uname)" =~ MINGW|MSYS ]]; then
-    log_error "qshim is for Windows Git Bash only."
+    log_error "wshims is for Windows Git Bash only."
     exit 1
 fi
 
@@ -23,21 +25,20 @@ if ! command -v wsl.exe >/dev/null 2>&1; then
     exit 1
 fi
 
-# Check if q works in WSL
+# Check if q works in WSL (optional)
 log_info "Checking if 'q' command exists in WSL..."
-if ! wsl.exe bash -c "export PATH=\"\$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:\$PATH\"; command -v q >/dev/null 2>&1"; then
-    log_error "'q' command not found in WSL."
-    log_error "Please install Amazon Q CLI in WSL first:"
-    log_error "  wsl"
-    log_error "  # Then follow installation instructions for Linux"
-    exit 1
-fi
-
-log_info "Testing 'q doctor' in WSL (with timeout)..."
-if timeout 3 wsl.exe bash -c "export PATH=\"\$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:\$PATH\"; q doctor" >/dev/null 2>&1; then
-    log_info "'q doctor' succeeded"
+if wsl.exe bash -c "${WSL_ENV_SETUP} command -v q >/dev/null 2>&1"; then
+    Q_AVAILABLE=1
+    log_info "Found 'q' in WSL"
+    log_info "Testing 'q doctor' in WSL (with timeout)..."
+    if timeout 3 wsl.exe bash -c "${WSL_ENV_SETUP} q doctor" >/dev/null 2>&1; then
+        log_info "'q doctor' succeeded"
+    else
+        log_warn "'q doctor' timed out or failed. Continuing..."
+    fi
 else
-    log_warn "'q doctor' timed out or failed. Continuing anyway..."
+    Q_AVAILABLE=0
+    log_warn "'q' not found in WSL. Q shims will be installed but require Q CLI in WSL."
 fi
 
 # Install to ~/.local/bin
@@ -63,5 +64,10 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
     echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
     echo ""
 else
-    log_info "You can now use: w (WSL wrapper), q, qchat, qterm"
+    if [[ $Q_AVAILABLE -eq 1 ]]; then
+        log_info "You can now use: w (WSL wrapper), q, qchat, qterm"
+    else
+        log_info "You can now use: w (WSL wrapper)"
+        log_warn "Install Amazon Q CLI in WSL to use q, qchat, qterm"
+    fi
 fi

@@ -6,6 +6,8 @@
 
 The [Amazon Q CLI](https://aws.amazon.com/q/) provides Linux binaries that don't run natively on Windows. **qshim** creates lightweight wrapper scripts that automatically run the WSL version when you type `q`, `qchat`, or `qterm` from your Windows shell—no matter what directory you're in.
 
+**Bonus:** Includes `w` - a reusable WSL wrapper that runs any command in WSL from your current Windows directory!
+
 ## Quick Start
 
 **One-line install:**
@@ -14,7 +16,7 @@ The [Amazon Q CLI](https://aws.amazon.com/q/) provides Linux binaries that don't
 curl -fsSL https://raw.githubusercontent.com/tommcd/qshim/main/install.sh | bash
 ```
 
-That's it! Now you can use `q`, `qchat`, and `qterm` from your Windows shell.
+That's it! Now you can use `q`, `qchat`, `qterm`, and `w` from your Windows shell.
 
 ## Requirements
 
@@ -54,31 +56,52 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ## How it Works
 
-Each shim script:
-1. Captures your current Windows directory (e.g., `C:\Users\you\project`)
-2. Converts it to WSL format using `wslpath` (if available) or regex fallback
-3. Sets a minimal PATH in WSL (including `~/.local/bin`) for fast execution
-4. Executes the command in WSL with the correct working directory
-5. Preserves all arguments, exit codes, and environment context
+The project includes two types of wrappers:
 
-**Performance note:** Shims avoid using login shells to prevent slow `.bashrc` loading. They set PATH explicitly for speed.
+### `w` - General WSL Wrapper
+A reusable command that runs anything in WSL from your current Windows directory:
+- Converts Windows path to WSL format (`wslpath` or regex fallback)
+- Sets a minimal PATH for fast execution (no slow `.bashrc` loading)
+- Preserves TTY for interactive commands
+- Works with any WSL command or script
 
-## Example
+### Q CLI Shims (`q`, `qchat`, `qterm`)
+Ultra-simple 3-line scripts that just call: `w q "$@"`, `w qchat "$@"`, `w qterm "$@"`
 
+**Performance note:** Uses explicit PATH setting instead of login shells to avoid slow startup times.
+
+## Examples
+
+### Using Q CLI
 ```bash
 # Navigate to any Windows directory
 cd /c/Users/you/my-project
 
-# Run q - it works seamlessly!
+# Run Q commands - they work seamlessly!
 q chat "explain this code"
+q --help
+q                          # Interactive mode
 
 # The command automatically runs in WSL at /mnt/c/users/you/my-project
+```
+
+### Using `w` for Other Commands
+```bash
+# Run any WSL command from Windows Git Bash
+w ls -la                   # List files in WSL
+w python3 script.py        # Run Python in WSL
+w                          # Open interactive bash in WSL
+w npm install              # Run npm in current directory
+
+# The 'w' command preserves your Windows directory location
+cd /c/Users/you/project
+w pwd                      # Shows: /mnt/c/users/you/project
 ```
 
 ## Uninstall
 
 ```bash
-rm ~/.local/bin/q ~/.local/bin/qchat ~/.local/bin/qterm
+rm ~/.local/bin/w ~/.local/bin/q ~/.local/bin/qchat ~/.local/bin/qterm
 ```
 
 ## Troubleshooting

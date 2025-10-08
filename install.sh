@@ -47,6 +47,7 @@ mkdir -p "$INSTALL_DIR"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 log_info "Installing shims to $INSTALL_DIR..."
+install -m 755 "$SCRIPT_DIR/w" "$INSTALL_DIR/w"
 install -m 755 "$SCRIPT_DIR/q" "$INSTALL_DIR/q"
 install -m 755 "$SCRIPT_DIR/qchat" "$INSTALL_DIR/qchat"
 install -m 755 "$SCRIPT_DIR/qterm" "$INSTALL_DIR/qterm"
@@ -62,5 +63,5 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
     echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
     echo ""
 else
-    log_info "You can now use: q, qchat, qterm"
+    log_info "You can now use: w (WSL wrapper), q, qchat, qterm"
 fi

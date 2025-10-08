@@ -1,19 +1,25 @@
-# qshim
+# wshims
 
-> Windows shell to WSL bridge for Amazon Q CLI
+> Windows to WSL bridge - Collection of lightweight shims for running Linux tools from Windows shells
 
 ## What is this?
 
-The [Amazon Q CLI](https://aws.amazon.com/q/) provides Linux binaries that don't run natively on Windows. **qshim** creates lightweight wrapper scripts that automatically run the WSL version when you type `q`, `qchat`, or `qterm` from your Windows shell—no matter what directory you're in.
+**wshims** provides a collection of lightweight wrapper scripts that bridge Windows shells (Git Bash, PowerShell, CMD) to WSL, allowing you to seamlessly run Linux tools as if they were native Windows commands.
 
-**Bonus:** Includes `w` - a reusable WSL wrapper that runs any command in WSL from your current Windows directory!
+### Core Components
+
+**`w`** - Universal WSL wrapper that runs any command in WSL from your current Windows directory. The foundation for all other shims.
+
+**Q CLI shims** (`q`, `qchat`, `qterm`) - Wrappers for [Amazon Q CLI](https://aws.amazon.com/q/), which provides Linux binaries that don't run natively on Windows.
+
+**Extensible** - Add your own shims for any Linux tool (Python, Node.js, Docker, etc.)
 
 ## Quick Start
 
 **One-line install:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tommcd/qshim/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/tommcd/wshims/main/install.sh | bash
 ```
 
 That's it! Now you can use `q`, `qchat`, `qterm`, and `w` from your Windows shell.
@@ -22,7 +28,7 @@ That's it! Now you can use `q`, `qchat`, `qterm`, and `w` from your Windows shel
 
 - **Windows** with a shell environment (Git Bash, PowerShell, or CMD)
 - **WSL** (Windows Subsystem for Linux) - [Install WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
-- **Amazon Q CLI** installed in WSL (not in Windows)
+- **Linux tools** installed in WSL (not in Windows) - e.g., Amazon Q CLI, Python, Node.js, etc.
 
 > **Note:** Currently supports Git Bash (MINGW/MSYS). PowerShell and CMD support coming soon!
 
@@ -31,21 +37,21 @@ That's it! Now you can use `q`, `qchat`, `qterm`, and `w` from your Windows shel
 ### Option 1: One-line install (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tommcd/qshim/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/tommcd/wshims/main/install.sh | bash
 ```
 
 ### Option 2: Manual install
 
 ```bash
-git clone https://github.com/tommcd/qshim.git
-cd qshim
+git clone https://github.com/tommcd/wshims.git
+cd wshims
 ./install.sh
 ```
 
 The installer will:
 - ✅ Check that WSL is available
-- ✅ Verify `q` command works in WSL
-- ✅ Install shims to `~/.local/bin/`
+- ✅ Verify `q` command works in WSL (if you use Q CLI)
+- ✅ Install `w` and Q CLI shims to `~/.local/bin/`
 - ✅ Warn you if `~/.local/bin` is not in your PATH
 
 If you see a PATH warning, add this to your `~/.bashrc`:
@@ -98,10 +104,42 @@ cd /c/Users/you/project
 w pwd                      # Shows: /mnt/c/users/you/project
 ```
 
+## Creating Your Own Shims
+
+The beauty of wshims is that you can easily create shims for any Linux tool. Just create a 3-line script:
+
+```bash
+#!/bin/bash
+# Shim for <your-tool>
+exec w <command> "$@"
+```
+
+### Example: Python shim
+
+Create `~/.local/bin/py` (if you want WSL Python instead of Windows Python):
+```bash
+#!/bin/bash
+exec w python3 "$@"
+```
+
+Make it executable: `chmod +x ~/.local/bin/py`
+
+Now `py script.py` runs Python from WSL in your current Windows directory!
+
+### Example: Node.js shim
+
+```bash
+#!/bin/bash
+exec w node "$@"
+```
+
+That's it! The `w` command handles all the complexity.
+
 ## Uninstall
 
 ```bash
 rm ~/.local/bin/w ~/.local/bin/q ~/.local/bin/qchat ~/.local/bin/qterm
+# Plus any custom shims you created
 ```
 
 ## Troubleshooting

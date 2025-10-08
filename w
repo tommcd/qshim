@@ -14,6 +14,9 @@ else
     WSL_PATH=$(echo "$WIN_DIR" | sed -e 's|^\([A-Za-z]\):|/mnt/\L\1|' -e 's|\\|/|g')
 fi
 
+# Escape single quotes by replacing ' with '"'"' for safe use inside single-quoted cd command
+WSL_PATH_ESCAPED=$(printf "%s" "$WSL_PATH" | sed "s/'/'\"'\"'/g")
+
 # Build args string - handle empty args case for interactive mode
 if [ $# -eq 0 ]; then
     ARGS=""
@@ -23,4 +26,10 @@ fi
 
 # Run in WSL with common PATH locations to avoid slow login shell
 # Use exec to preserve TTY for interactive mode
-exec wsl.exe bash -c "export PATH=\"\$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:\$PATH\"; cd '$WSL_PATH' && exec $ARGS"
+if [ -z "$ARGS" ]; then
+    WSL_COMMAND="exec bash"
+else
+    WSL_COMMAND="exec $ARGS"
+fi
+
+exec wsl.exe bash -c "export PATH=\"\$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:\$PATH\"; cd '$WSL_PATH_ESCAPED' && $WSL_COMMAND"

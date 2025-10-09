@@ -9,8 +9,9 @@
 if [[ -n "${WSL_DISTRO_NAME:-}" ]] || [[ "$(uname -r)" == *microsoft* ]]; then
   # We're inside WSL - this script shouldn't run here
   # Try to find and execute the real 'w' command (Linux who command)
-  real_w=$(PATH="${PATH#/mnt/c*}" command -v w 2>/dev/null | grep -v "\.local/bin/w" | head -1)
-  if [[ -n "$real_w" ]]; then
+  # Filter all Windows drive paths (/mnt/c, /mnt/d, etc.)
+  real_w=$(PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "^/mnt/[c-z]" | tr '\n' ':' | sed 's/:$//') command -v w 2>/dev/null | head -1)
+  if [[ -n "$real_w" && ! "$real_w" -ef "$0" ]]; then
     exec "$real_w" "$@"
   else
     echo "Error: 'w' shim should only run from Windows, not from within WSL" >&2

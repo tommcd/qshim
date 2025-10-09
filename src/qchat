@@ -3,9 +3,9 @@
 
 # If running inside WSL, this shim should not run
 if [[ -n "${WSL_DISTRO_NAME:-}" ]] || [[ "$(uname -r)" == *microsoft* ]]; then
-  # Try to find the real qchat binary in WSL (excluding Windows paths)
-  real_qchat=$(PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "^/mnt/c" | tr '\n' ':') command -v qchat 2>/dev/null)
-  if [[ -n "$real_qchat" && "$real_qchat" != "$0" ]]; then
+  # Try to find the real qchat binary in WSL (excluding all Windows drive paths)
+  real_qchat=$(PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "^/mnt/[c-z]" | tr '\n' ':' | sed 's/:$//') command -v qchat 2>/dev/null)
+  if [[ -n "$real_qchat" && ! "$real_qchat" -ef "$0" ]]; then
     exec "$real_qchat" "$@"
   fi
   # qchat not found - not a critical command, exit silently

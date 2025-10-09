@@ -5,13 +5,28 @@
 #          w q chat "hello"
 #          w  (opens interactive bash)
 
+# If already running inside WSL, pass through to the real w command (or exit)
+if [[ -n "${WSL_DISTRO_NAME:-}" ]] || [[ "$(uname -r)" == *microsoft* ]]; then
+  # We're inside WSL - this script shouldn't run here
+  # Try to find and execute the real 'w' command (Linux who command)
+  real_w=$(PATH="${PATH#/mnt/c*}" command -v w 2>/dev/null | grep -v "\.local/bin/w" | head -1)
+  if [[ -n "$real_w" ]]; then
+    exec "$real_w" "$@"
+  else
+    echo "Error: 'w' shim should only run from Windows, not from within WSL" >&2
+    exit 1
+  fi
+fi
+
 WIN_DIR="$(pwd -W 2>/dev/null || pwd)"
 
 # Use wslpath if available, otherwise fall back to sed conversion
 if command -v wslpath >/dev/null 2>&1; then
   WSL_PATH=$(wslpath -a "$WIN_DIR")
 else
-  WSL_PATH=$(echo "$WIN_DIR" | sed -e 's|^\([A-Za-z]\):|/mnt/\L\1|' -e 's|\\|/|g')
+  # Convert Windows paths to WSL format
+  # Handles: C:\path, C:/path, and Git Bash /c/path formats
+  WSL_PATH=$(echo "$WIN_DIR" | sed -e 's|^\([A-Za-z]\):|/mnt/\L\1|' -e 's|^/\([a-z]\)/|/mnt/\1/|' -e 's|\\|/|g')
 fi
 
 # Escape single quotes by replacing ' with '"'"' for safe use inside single-quoted cd command

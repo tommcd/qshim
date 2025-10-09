@@ -1,3 +1,16 @@
 #!/bin/bash
 # Git Bash shim for Amazon Q Terminal - runs via WSL using 'w' wrapper
+
+# If running inside WSL, this shim should not run
+if [[ -n "${WSL_DISTRO_NAME:-}" ]] || [[ "$(uname -r)" == *microsoft* ]]; then
+  # Check common WSL qterm locations (must be in Linux filesystem, not /mnt/c)
+  for qterm_path in "$HOME/.local/bin/qterm" "/usr/local/bin/qterm" "$HOME/q/bin/qterm"; do
+    if [[ -x "$qterm_path" && "$qterm_path" != "$0" && "$qterm_path" != /mnt/c/* ]]; then
+      exec "$qterm_path" "$@"
+    fi
+  done
+  # qterm doesn't exist in WSL - just start a regular shell instead
+  exec bash "$@"
+fi
+
 exec w qterm "$@"

@@ -1,3 +1,22 @@
 #!/bin/bash
 # Git Bash shim for Amazon Q CLI - runs via WSL using 'w' wrapper
+
+# If running inside WSL, execute the real q command instead of the shim
+if [[ -n "${WSL_DISTRO_NAME:-}" ]] || [[ "$(uname -r)" == *microsoft* ]]; then
+  # Find the real q binary in WSL (check common locations)
+  if [[ -x "$HOME/.local/bin/q" ]] && [[ ! "$HOME/.local/bin/q" -ef "$0" ]]; then
+    exec "$HOME/.local/bin/q" "$@"
+  elif [[ -x "$HOME/q/bin/q" ]]; then
+    exec "$HOME/q/bin/q" "$@"
+  else
+    # Try to find it in PATH, excluding Windows paths
+    real_q=$(PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "^/mnt/c" | tr '\n' ':') command -v q 2>/dev/null)
+    if [[ -n "$real_q" ]]; then
+      exec "$real_q" "$@"
+    fi
+    # If q doesn't exist in WSL, exit silently (don't break shell startup)
+    exit 0
+  fi
+fi
+
 exec w q "$@"

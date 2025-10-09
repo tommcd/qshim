@@ -64,13 +64,13 @@ else
   log_fail "Expected /mnt/c/Program Files/test, got $RESULT"
 fi
 
-# Test 5: Forward slashes (Git Bash style)
-log_info "Test 5: Forward slashes (Git Bash /c/ style)"
-RESULT=$(printf '%s' "/c/Users/test" | sed -e 's|^\([A-Za-z]\):|/mnt/\L\1|' -e 's|\\|/|g')
-if [ "$RESULT" = "/c/Users/test" ]; then
-  log_pass "Forward slashes pass through unchanged"
+# Test 5: Git Bash path format (should convert to WSL format)
+log_info "Test 5: Git Bash path format (/c/ -> /mnt/c/)"
+RESULT=$(printf '%s' "/c/Users/test" | sed -e 's|^\([A-Za-z]\):|/mnt/\L\1|' -e 's|^/\([a-z]\)/|/mnt/\1/|' -e 's|\\|/|g')
+if [ "$RESULT" = "/mnt/c/Users/test" ]; then
+  log_pass "Git Bash path converts correctly"
 else
-  log_fail "Expected /c/Users/test, got $RESULT"
+  log_fail "Expected /mnt/c/Users/test, got $RESULT"
 fi
 
 # Test 6: WSL check
